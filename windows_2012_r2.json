@@ -21,6 +21,7 @@
 
       "floppy_files": [
         "{{user `autounattend`}}",
+        "./scripts/static_ip.ps1",
         "./scripts/disable-winrm.ps1",
         "./scripts/enable-winrm.ps1",
         "./scripts/microsoft-updates.bat",
@@ -69,12 +70,11 @@
     "iso_checksum_type": "md5",
     "iso_checksum": "9a00defab26a046045d939086df78460",
     "autounattend": "./answer_files/2012_r2/Autounattend.xml",
-    "hostName": "esxihost.localnet",
+    "hostName": "192.168.64.126",
     "ESXusernameText": "root",
-    "ESXpasswordText": "password",
+    "ESXpasswordText": "raid4us!",
     "vm_nameText": "PackerTemplateWin2012R2",
     "vm_networkName": "VM Network",
-    "vm_disksize": "61440",
-    "datastoreName": "esxihost-1"
+    "datastoreName": "vmdatastore"
   }
 }
