@@ -33,46 +33,6 @@
         "numvcpus": "2",
         "scsi0.virtualDev": "lsisas1068"
       }
-    },
-    {
-      "type": "virtualbox-iso",
-      "vm_name":"windows_2012_r2",
-      "communicator": "winrm",
-      "iso_url": "{{user `iso_url`}}",
-      "iso_checksum_type": "{{user `iso_checksum_type`}}",
-      "iso_checksum": "{{user `iso_checksum`}}",
-      "headless": true,
-      "boot_wait": "2m",
-      "winrm_username": "vagrant",
-      "winrm_password": "vagrant",
-      "winrm_timeout": "6h",
-      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
-      "guest_os_type": "Windows2012_64",
-      "guest_additions_mode": "disable",
-      "disk_size": 61440,
-      "floppy_files": [
-        "{{user `autounattend`}}",
-        "./scripts/disable-winrm.ps1",
-        "./scripts/enable-winrm.ps1",
-        "./scripts/microsoft-updates.bat",
-        "./scripts/unattend.xml",
-        "./scripts/win-updates.ps1",
-        "./scripts/oracle-cert.cer"
-      ],
-      "vboxmanage": [
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--memory",
-          "2048"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--cpus",
-          "2"
-        ]
-      ]
     }
   ],
   "provisioners": [
