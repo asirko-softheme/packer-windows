@@ -2,20 +2,32 @@
   "builders": [
     {
       "type": "vmware-iso",
+<<<<<<< HEAD
       "vm_name":"asirko_windows_2012_r2_with_updates",
+=======
+      "vm_name":"asirko_win_2012_r2_no_updates",
+>>>>>>> db769367076ac292d1ce7d945c3bc3d687ed190a
       "communicator": "winrm",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "iso_checksum": "{{user `iso_checksum`}}",
       "headless": true,
+      "keep_registered": true,
       "boot_wait": "2m",
+<<<<<<< HEAD
       "winrm_username": "AppAssure",
       "winrm_password": "123asdQ",
+=======
+      "winrm_host": "192.168.64.108",
+      "winrm_username": "appassure",
+      "winrm_password": "appassure",
+>>>>>>> db769367076ac292d1ce7d945c3bc3d687ed190a
       "winrm_timeout": "6h",
       "winrm_host": "192.168.64.108",
       "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
       "guest_os_type": "windows8srv-64",
       "disk_size": 61440,
+      "disk_type_id": "thin",
       "vnc_port_min": 5900,
       "vnc_port_max": 5980,
       "skip_compaction": false,
@@ -50,6 +62,7 @@
   "provisioners": [
     {
       "type": "windows-shell",
+      "pause_before": "30s",
       "scripts": [
         "./scripts/vm-guest-tools.bat",
         "./scripts/enable-rdp.bat",
@@ -59,6 +72,10 @@
     }
   ],
   "post-processors": [
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 719f4f4790516754509bd47d84612f356760b2ee
   ],
   "variables": {
     "iso_url": "E:/Downloads/en_windows_server_2012_r2_vl_with_update_x64_dvd_6052766.iso",
