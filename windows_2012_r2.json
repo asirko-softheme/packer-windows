@@ -2,15 +2,15 @@
   "builders": [
     {
       "type": "vmware-iso",
-      "vm_name":"windows_2012_r2",
+      "vm_name":"asirko_windows_2012_r2_with_updates",
       "communicator": "winrm",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "iso_checksum": "{{user `iso_checksum`}}",
       "headless": true,
       "boot_wait": "2m",
-      "winrm_username": "vagrant",
-      "winrm_password": "vagrant",
+      "winrm_username": "AppAssure",
+      "winrm_password": "123asdQ",
       "winrm_timeout": "6h",
       "winrm_host": "192.168.64.108",
       "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
@@ -19,6 +19,7 @@
       "vnc_port_min": 5900,
       "vnc_port_max": 5980,
       "skip_compaction": false,
+      "output_directory": "asirko_windows_2012_r2_with_updates",
 
       "floppy_files": [
         "{{user `autounattend`}}",
