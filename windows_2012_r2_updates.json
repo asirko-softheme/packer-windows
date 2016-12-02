@@ -2,7 +2,7 @@
   "builders": [
     {
       "type": "vmware-iso",
-      "vm_name":"asirko_windows_2012_r2_no_updates",
+      "vm_name":"asirko_windows_2012_r2_with_updates",
       "communicator": "winrm",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
@@ -19,7 +19,7 @@
       "vnc_port_min": 5900,
       "vnc_port_max": 5980,
       "skip_compaction": false,
-      "output_directory": "asirko_windows_2012_r2_no_updates",
+      "output_directory": "asirko_windows_2012_r2_with_updates",
 
       "floppy_files": [
         "{{user `autounattend`}}",
@@ -64,7 +64,7 @@
     "iso_url": "E:/Downloads/en_windows_server_2012_r2_vl_with_update_x64_dvd_6052766.iso",
     "iso_checksum_type": "md5",
     "iso_checksum": "9a00defab26a046045d939086df78460",
-    "autounattend": "./answer_files/2012_r2/Autounattend.xml",
+    "autounattend": "./answer_files/2012_r2_updates/Autounattend.xml",
     "hostName": "192.168.64.126",
     "ESXusernameText": "root",
     "ESXpasswordText": "raid4us!",
