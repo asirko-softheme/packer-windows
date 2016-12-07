@@ -2,7 +2,7 @@
   "builders": [
     {
       "type": "vmware-iso",
-      "vm_name":"asirko_windows_2012_r2_no_updates",
+      "vm_name":"asirko_windows_2012_r2_no_updates1",
       "communicator": "winrm",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
@@ -19,7 +19,7 @@
       "vnc_port_min": 5900,
       "vnc_port_max": 5980,
       "skip_compaction": false,
-      "output_directory": "asirko_windows_2012_r2_no_updates",
+      "output_directory": "asirko_windows_2012_r2_no_updates1",
 
       "floppy_files": [
         "{{user `autounattend`}}",
@@ -53,6 +53,8 @@
       "scripts": [
         "./scripts/vm-guest-tools.bat",
         "./scripts/enable-rdp.bat",
+        "./scripts/chocolatey.bat",
+        "./scripts/notepad.bat",
         "./scripts/compile-dotnet-assemblies.bat",
         "./scripts/compact.bat"
       ]
