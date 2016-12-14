@@ -2,7 +2,7 @@
   "builders": [
     {
       "type": "vmware-iso",
-      "vm_name":"asirko_windows_2008r2_updates",
+      "vm_name":"asirko_windows_2016_with_updates",
       "communicator": "winrm",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
@@ -14,20 +14,22 @@
       "winrm_timeout": "6h",
       "winrm_host": "192.168.64.108",
       "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
-      "guest_os_type": "windows7srv-64",
-      "tools_upload_flavor": "windows",
+      "guest_os_type": "windows8srv-64",
       "disk_size": 61440,
       "vnc_port_min": 5900,
-      "vnc_port_max": 5980,      
-      "output_directory": "asirko_windows_2008r2_updates",
+      "vnc_port_max": 5980,
+      "skip_compaction": false,
+      "output_directory": "asirko_windows_2016_with_updates",
       "floppy_files": [
+        "{{user `autounattend`}}",
         "./scripts/static_ip.ps1",
-        "./answer_files/2008_r2/Autounattend.xml",
-        "./scripts/dis-updates.ps1",
-        "./scripts/microsoft-updates.bat",
-        "./scripts/win-updates.ps1",
+        "./floppy/WindowsPowershell.lnk",
+        "./floppy/PinTo10.exe",
+        "./scripts/disable-screensaver.ps1",
         "./scripts/disable-winrm.ps1",
-        "./scripts/enable-winrm.ps1"
+        "./scripts/enable-winrm.ps1",
+        "./scripts/microsoft-updates.bat",
+        "./scripts/win-updates.ps1"
       ],
       "remote_type": "esx5",
       "remote_host": "{{user `hostName`}}",
@@ -49,24 +51,42 @@
   "provisioners": [
     {
       "type": "windows-shell",
+      "execute_command": "{{ .Vars }} cmd /c \"{{ .Path }}\"",
       "scripts": [
         "./scripts/vm-guest-tools.bat",
-        "./scripts/chef.bat",
-        "./scripts/enable-rdp.bat",
+        "./scripts/enable-rdp.bat"
+      ]
+    },
+    {
+      "type": "powershell",
+      "scripts": [
+        "./scripts/debloat-windows.ps1"
+      ]
+    },
+    {
+      "type": "windows-restart"
+    },
+    {
+      "type": "windows-shell",
+      "execute_command": "{{ .Vars }} cmd /c \"{{ .Path }}\"",
+      "scripts": [
+        "./scripts/pin-powershell.bat",
+        "./scripts/set-winrm-automatic.bat",        
         "./scripts/chocolatey.bat",
         "./scripts/apps.bat",
         "./scripts/compile-dotnet-assemblies.bat",
+        "./scripts/uac-enable.bat",
         "./scripts/compact.bat"
       ]
     }
   ],
   "post-processors": [
-  ],  
+  ],
   "variables": {
-    "iso_url": "E:/Downloads/en_windows_server_2008_r2_with_sp1_vl_build_x64_dvd_617403.iso",
+    "iso_url": "E:/Downloads/en_windows_server_2016_x64_dvd_9327751.iso",
     "iso_checksum_type": "md5",
-    "iso_checksum": "8d397b69135d207452a78c3c3051339d",
-    "autounattend": "./answer_files/2008_r2/Autounattend.xml",
+    "iso_checksum": "91d7b2ebcff099b3557570af7a8a5cd6",
+    "autounattend": "./answer_files/2016_updates/Autounattend.xml",
     "hostName": "192.168.64.126",
     "ESXusernameText": "root",
     "ESXpasswordText": "raid4us!",

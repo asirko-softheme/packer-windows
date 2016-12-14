@@ -36,7 +36,7 @@
                         </ModifyPartition>
                         <ModifyPartition wcm:action="add">
                             <Format>NTFS</Format>
-                            <Label>Windows 2012 R2</Label>
+                            <Label>Windows 2016</Label>
                             <Letter>C</Letter>
                             <Order>2</Order>
                             <PartitionID>2</PartitionID>
@@ -51,7 +51,7 @@
                     <InstallFrom>
                         <MetaData wcm:action="add">
                             <Key>/IMAGE/NAME </Key>
-                            <Value>Windows Server 2012 R2 SERVERSTANDARD</Value>
+                            <Value>Windows Server 2016 SERVERSTANDARD</Value>
                         </MetaData>
                     </InstallFrom>
                     <InstallTo>
@@ -61,11 +61,11 @@
                 </OSImage>
             </ImageInstall>
             <UserData>
-                <!-- Product Key from http://technet.microsoft.com/en-us/library/jj612867.aspx -->
+                <!-- Product Key from https://www.microsoft.com/de-de/evalcenter/evaluate-windows-server-technical-preview?i=1 -->
                 <ProductKey>
                     <!-- Do not uncomment the Key element if you are using trial ISOs -->
                     <!-- You must uncomment the Key element (and optionally insert your own key) if you are using retail or volume license ISOs -->
-                    <!--<Key>D2N9P-3P6X9-2R39C-7RTCD-MDVJX</Key>-->
+                    <Key>WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY</Key>
                     <WillShowUI>OnError</WillShowUI>
                 </ProductKey>
                 <AcceptEula>true</AcceptEula>
@@ -79,7 +79,7 @@
             <OEMInformation>
                 <HelpCustomized>false</HelpCustomized>
             </OEMInformation>
-            <ComputerName>win-2012-r2</ComputerName>
+            <ComputerName>win-2016</ComputerName>
             <TimeZone>Pacific Standard Time</TimeZone>
             <RegisteredOwner/>
         </component>
@@ -107,7 +107,7 @@
                     <Order>2</Order>
                     <Description>Set Execution Policy 32 Bit</Description>
                     <Path>cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force"</Path>
-                </RunSynchronousCommand>                
+                </RunSynchronousCommand>
                 <RunSynchronousCommand wcm:action="add">
                     <Order>3</Order>
                     <Description>Disable WinRM</Description>
@@ -191,28 +191,35 @@
                     <Description>Disable password expiration for Administrator user</Description>
                 </SynchronousCommand>
                 <!-- WITHOUT WINDOWS UPDATES -->
-                
+                <!--
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File a:\enable-winrm.ps1</CommandLine>
                     <Description>Enable WinRM</Description>
                     <Order>99</Order>
                 </SynchronousCommand>
-                
+                -->
                 <!-- END WITHOUT WINDOWS UPDATES -->
                 <!-- WITH WINDOWS UPDATES -->
-                <!--
+				
+
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c a:\microsoft-updates.bat</CommandLine>
                     <Order>98</Order>
                     <Description>Enable Microsoft Updates</Description>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File a:\win-updates.ps1</CommandLine>
-                    <Description>Install Windows Updates</Description>
+                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File a:\disable-screensaver.ps1</CommandLine>
+                    <Description>Disable Screensaver</Description>
                     <Order>100</Order>
                     <RequiresUserInput>true</RequiresUserInput>
                 </SynchronousCommand>
-                -->
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -File a:\win-updates.ps1</CommandLine>
+                    <Description>Install Windows Updates</Description>
+                    <Order>101</Order>
+                    <RequiresUserInput>true</RequiresUserInput>
+                </SynchronousCommand>
+				
                 <!-- END WITH WINDOWS UPDATES -->
             </FirstLogonCommands>
             <OOBE>
