@@ -1,2 +1,2 @@
-choco install notepadplusplus -y
-choco install 7zip -y
+choco install notepadplusplus.install -y
+choco install 7zip.install -y
