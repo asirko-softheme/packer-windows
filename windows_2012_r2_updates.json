@@ -60,7 +60,8 @@
     "scripts": [
       "./scripts/chocolatey.ps1",
 	  "./scripts/apps.ps1",
-	  "./scripts/disable-uac.ps1"
+	  "./scripts/disable-uac.ps1",
+	  "./scripts/disable-screensaver.ps1"
     ]
 	},
 	{

@@ -119,7 +119,7 @@
                     <Order>2</Order>
                     <Description>Set Execution Policy 32 Bit</Description>
                     <Path>cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force"</Path>
-                </RunSynchronousCommand>                
+                </RunSynchronousCommand>
                 <RunSynchronousCommand wcm:action="add">
                     <Order>3</Order>
                     <Description>Disable WinRM</Description>
