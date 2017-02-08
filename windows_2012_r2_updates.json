@@ -18,6 +18,7 @@
       "disk_size": 61440,
       "vnc_port_min": 5900,
       "vnc_port_max": 5980,
+	  "keep_registered": true,
       "skip_compaction": false,
       "output_directory": "asirko_windows_2012_r2_with_updates",
 
@@ -58,7 +59,8 @@
     "elevated_password": "raid4us!",
     "scripts": [
       "./scripts/chocolatey.ps1",
-	  "./scripts/apps.ps1" 
+	  "./scripts/apps.ps1",
+	  "./scripts/disable-uac.ps1"
     ]
 	},
 	{
