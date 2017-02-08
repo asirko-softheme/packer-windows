@@ -27,7 +27,9 @@
         "./scripts/microsoft-updates.bat",
         "./scripts/win-updates.ps1",
         "./scripts/disable-winrm.ps1",
-        "./scripts/enable-winrm.ps1"
+        "./scripts/enable-winrm.ps1",
+		"./scripts/vmware/drivers/pvscsi64",
+		"./scripts/vmware/drivers/vmxnet3"
       ],
       "remote_type": "esx5",
       "remote_host": "{{user `hostName`}}",
@@ -39,10 +41,10 @@
         "RemoteDisplay.vnc.port": "5900",
         "memsize": "2048",
         "numvcpus": "2",
-        "scsi0.virtualDev": "lsisas1068",
-        "ethernet0.networkName": "{{user `vm_networkName`}}",
+        "scsi0.virtualDev": "pvscsi",
+		"ethernet0.virtualDev": "vmxnet3",
+		"ethernet0.networkName": "{{user `vm_networkName`}}",
         "ethernet0.present": "TRUE",
-        "ethernet0.virtualDev": "e1000e"
       }
     }
   ],

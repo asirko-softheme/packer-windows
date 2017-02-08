@@ -1,15 +1,48 @@
+
 param($global:RestartRequired=0,
         $global:MoreUpdates=0,
-        $global:MaxCycles=5,
+        $global:MaxCycles=100,
         $MaxUpdatesPerCycle=500)
 
-$Logfile = "C:\Windows\Temp\win-updates.log"
+$ErrorActionPreference="Stop"
+$ProgressPreference="SilentlyContinue"
+
+for ([byte]$c = [char]'A'; $c -le [char]'Z'; $c++)  
+{  
+	$variablePath = [char]$c + ':\variables.ps1'
+
+	if (test-path $variablePath) {
+		. $variablePath
+		break
+	}
+}
+
+"Starting $($MyInvocation.MyCommand.Name)" | Out-File -Filepath "$($env:TEMP)\BoxImageCreation_$($MyInvocation.MyCommand.Name).started.txt" -Append
+
+$Logfile = "$env:TEMP\\win-updates.log"
 
 function LogWrite {
    Param ([string]$logstring)
    $now = Get-Date -format s
    Add-Content $Logfile -value "$now $logstring"
    Write-Host $logstring
+}
+
+function EnableWinRm {
+Enable-PSRemoting -Force
+winrm quickconfig -q
+winrm quickconfig -transport:http
+winrm set winrm/config '@{MaxTimeoutms="1800000"}'
+winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="800"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/client/auth '@{Basic="true"}'
+winrm set winrm/config/listener?Address=*+Transport=HTTP '@{Port="5985"}'
+netsh advfirewall firewall set rule group="Windows Remote Administration" new enable=yes
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=allow
+Set-Service winrm -startuptype "auto"
+Restart-Service winrm
+
 }
 
 function Check-ContinueRestartOrEnd() {
@@ -30,10 +63,10 @@ function Check-ContinueRestartOrEnd() {
                 Install-WindowsUpdates
             } elseif ($script:Cycles -gt $global:MaxCycles) {
                 LogWrite "Exceeded Cycle Count - Stopping"
-                Invoke-Expression "a:\enable-winrm.ps1"
+                EnableWinRm
             } else {
                 LogWrite "Done Installing Windows Updates"
-                Invoke-Expression "a:\enable-winrm.ps1"
+                EnableWinRm
             }
         }
         1 {
@@ -50,6 +83,7 @@ function Check-ContinueRestartOrEnd() {
         }
         default {
             LogWrite "Unsure If A Restart Is Required"
+            Restart-Computer
             break
         }
     }
@@ -60,7 +94,7 @@ function Install-WindowsUpdates() {
     LogWrite "Evaluating Available Updates with limit of $($MaxUpdatesPerCycle):"
     $UpdatesToDownload = New-Object -ComObject 'Microsoft.Update.UpdateColl'
     $script:i = 0;
-    $CurrentUpdates = $SearchResult.Updates
+    $CurrentUpdates = $script:SearchResult.Updates
     while($script:i -lt $CurrentUpdates.Count -and $script:CycleUpdateCount -lt $MaxUpdatesPerCycle) {
         $Update = $CurrentUpdates.Item($script:i)
         if (($Update -ne $null) -and (!$Update.IsDownloaded)) {
@@ -94,6 +128,7 @@ function Install-WindowsUpdates() {
         $ok = 0;
         while (! $ok) {
             try {
+            	LogWrite 'Starting download...'
                 $Downloader = $UpdateSession.CreateUpdateDownloader()
                 $Downloader.Updates = $UpdatesToDownload
                 $Downloader.Download()
@@ -105,12 +140,13 @@ function Install-WindowsUpdates() {
                 Start-Sleep -s 30
             }
         }
+        LogWrite 'Finished Downloading Updates...'
     }
 
     $UpdatesToInstall = New-Object -ComObject 'Microsoft.Update.UpdateColl'
     [bool]$rebootMayBeRequired = $false
     LogWrite 'The following updates are downloaded and ready to be installed:'
-    foreach ($Update in $SearchResult.Updates) {
+    foreach ($Update in $script:SearchResult.Updates) {
         if (($Update.IsDownloaded)) {
             LogWrite "> $($Update.Title)"
             $UpdatesToInstall.Add($Update) |Out-Null
@@ -124,9 +160,6 @@ function Install-WindowsUpdates() {
     if ($UpdatesToInstall.Count -eq 0) {
         LogWrite 'No updates available to install...'
         $global:MoreUpdates=0
-        $global:RestartRequired=0
-        Invoke-Expression "a:\enable-winrm.ps1"
-        break
     }
 
     if ($rebootMayBeRequired) {
@@ -134,30 +167,30 @@ function Install-WindowsUpdates() {
         $global:RestartRequired=1
     }
 
-    LogWrite 'Installing updates...'
+    if ($UpdatesToInstall.Count -gt 0) {
+        LogWrite 'Installing updates...'
 
-    $Installer = $script:UpdateSession.CreateUpdateInstaller()
-    $Installer.Updates = $UpdatesToInstall
-    $InstallationResult = $Installer.Install()
+        $Installer = $script:UpdateSession.CreateUpdateInstaller()
+        $Installer.Updates = $UpdatesToInstall
+		$InstallationResult = $Installer.Install()
 
-    LogWrite "Installation Result: $($InstallationResult.ResultCode)"
-    LogWrite "Reboot Required: $($InstallationResult.RebootRequired)"
-    LogWrite 'Listing of updates installed and individual installation results:'
-    if ($InstallationResult.RebootRequired) {
-        $global:RestartRequired=1
-    } else {
-        $global:RestartRequired=0
-    }
-
-    for($i=0; $i -lt $UpdatesToInstall.Count; $i++) {
-        New-Object -TypeName PSObject -Property @{
-            Title = $UpdatesToInstall.Item($i).Title
-            Result = $InstallationResult.GetUpdateResult($i).ResultCode
+        LogWrite "Installation Result: $($InstallationResult.ResultCode)"
+        LogWrite "Reboot Required: $($InstallationResult.RebootRequired)"
+        LogWrite 'Listing of updates installed and individual installation results:'
+        if ($InstallationResult.RebootRequired) {
+            $global:RestartRequired=1
         }
-        LogWrite "Item: " $UpdatesToInstall.Item($i).Title
-        LogWrite "Result: " $InstallationResult.GetUpdateResult($i).ResultCode;
-    }
 
+        for($i=0; $i -lt $UpdatesToInstall.Count; $i++) {
+            New-Object -TypeName PSObject -Property @{
+                Title = $UpdatesToInstall.Item($i).Title
+                Result = $InstallationResult.GetUpdateResult($i).ResultCode
+            }
+
+			LogWrite "Item: " $UpdatesToInstall.Item($i).Title
+			LogWrite "Result: " $InstallationResult.GetUpdateResult($i).ResultCode;
+        }
+    }
     Check-ContinueRestartOrEnd
 }
 
@@ -178,7 +211,7 @@ function Check-WindowsUpdates() {
     $script:maxAttempts = 12
     while(-not $script:successful -and $script:attempts -lt $script:maxAttempts) {
         try {
-            $script:SearchResult = $script:UpdateSearcher.Search("IsInstalled=0 and Type='Software' and IsHidden=0")
+            $script:SearchResult = $script:UpdateSearcher.Search("IsAssigned=1 and IsInstalled=0 and Type='Software' and IsHidden=0")
             $script:successful = $TRUE
         } catch {
             LogWrite $_.Exception | Format-List -force
@@ -188,16 +221,17 @@ function Check-WindowsUpdates() {
         }
     }
 
-    if ($SearchResult.Updates.Count -ne 0) {
-        $Message = "There are " + $SearchResult.Updates.Count + " more updates."
+    if ($script:SearchResult.Updates.Count -ne 0) {
+        $Message = "There are " + $script:SearchResult.Updates.Count + " more updates."
         LogWrite $Message
         try {
-            for($i=0; $i -lt $script:SearchResult.Updates.Count; $i++) {
-              LogWrite $script:SearchResult.Updates.Item($i).Title
-              LogWrite $script:SearchResult.Updates.Item($i).Description
-              LogWrite $script:SearchResult.Updates.Item($i).RebootRequired
-              LogWrite $script:SearchResult.Updates.Item($i).EulaAccepted
-          }
+			for($i=0; $i -lt $script:SearchResult.Updates.Count; $i++) {
+				LogWrite script:SearchResult.Updates.Item($i).Title
+				LogWrite $script:SearchResult.Updates.Item($i).Description
+				LogWrite $script:SearchResult.Updates.Item($i).RebootRequired
+				LogWrite $script:SearchResult.Updates.Item($i).EulaAccepted
+			}
+
             $global:MoreUpdates=1
         } catch {
             LogWrite $_.Exception | Format-List -force
@@ -215,10 +249,34 @@ function Check-WindowsUpdates() {
     }
 }
 
+if ($SkipWindowsUpdates){
+	Write-Host "Skipping windows updates"
+	EnableWinRm
+	exit 0
+}
+
 $script:ScriptName = $MyInvocation.MyCommand.ToString()
 $script:ScriptPath = $MyInvocation.MyCommand.Path
 $script:UpdateSession = New-Object -ComObject 'Microsoft.Update.Session'
 $script:UpdateSession.ClientApplicationID = 'Packer Windows Update Installer'
+
+if ($proxyServerAddress) {
+    $script:WebProxy = New-Object -ComObject 'Microsoft.Update.WebProxy'
+    $script:WebProxyBypass = New-Object -ComObject 'Microsoft.Update.StringColl'
+    $script:WebProxyBypass.Add("*.localtest.me")
+    $script:WebProxy.AutoDetect = $false
+    $script:WebProxy.Address = $proxyServerAddress
+    if ($proxyServerUsername) {
+        $script:WebProxy.Username = $proxyServerUsername
+    }
+    if ($proxyServerPassword) {
+        $script:WebProxy.SetPassword($proxyServerPassword)
+    }
+    $script:WebProxy.BypassProxyOnLocal = $true
+    $script:WebProxy.BypassList = $script:WebProxyBypass
+    $script:UpdateSession.WebProxy = $script:WebProxy
+}
+
 $script:UpdateSearcher = $script:UpdateSession.CreateUpdateSearcher()
 $script:SearchResult = New-Object -ComObject 'Microsoft.Update.UpdateColl'
 $script:Cycles = 0
