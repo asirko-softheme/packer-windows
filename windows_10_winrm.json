@@ -1,0 +1,112 @@
+{
+  "builders": [
+    {
+      "type": "vmware-iso",
+	  "vm_name":"asirko_windows_10_updates",
+      "communicator": "winrm",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "headless": false,
+      "boot_wait": "6m",
+      "boot_command": "",
+      "winrm_username": "administrator",
+      "winrm_password": "raid4us!",
+      "winrm_timeout": "6h",
+	  "winrm_host": "192.168.64.110",
+      "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
+      "guest_os_type": "windows8srv-64",
+      "disk_size": "{{user `disk_size`}}",
+	  "keep_registered": true,
+      "skip_compaction": false,
+	  "output_directory": "asirko_windows_10_updates",
+      "vnc_port_min": 5900,
+      "vnc_port_max": 5980,
+      "floppy_files": [
+        "{{user `autounattend`}}",
+		"./scripts/variables.ps1",
+		"./scripts/fixnetwork.ps1",
+        "./scripts/static_ip.ps1",
+        "./scripts/disable-winrm.ps1",
+        "./scripts/enable-winrm.ps1",
+        "./scripts/microsoft-updates.bat",
+        "./scripts/unattend.xml",
+        "./scripts/win-updates.ps1",
+		"./scripts/sdelete.exe",
+		"./scripts/disable-screensaver.ps1",
+		"./scripts/vmware/drivers/pvscsi64",
+      	"./scripts/vmware/drivers/vmxnet3"
+      ],
+	  "remote_type": "esx5",
+      "remote_host": "{{user `hostName`}}",
+      "remote_username": "{{user `ESXusernameText`}}",
+      "remote_password": "{{user `ESXpasswordText`}}",
+      "remote_datastore": "{{user `datastoreName`}}",
+      "vmx_data": {
+        "RemoteDisplay.vnc.enabled": "false",
+        "RemoteDisplay.vnc.port": "5900",
+        "memsize": "2048",
+        "numvcpus": "2",
+        "scsi0.virtualDev": "pvscsi",
+		"ethernet0.virtualDev": "vmxnet3",
+		"ethernet0.networkName": "{{user `vm_networkName`}}",
+        "ethernet0.present": "TRUE"
+      }
+    }
+  ],
+  "provisioners": [
+	{
+	"type": "powershell",
+    "elevated_user": "administrator",
+    "elevated_password": "raid4us!",
+    "scripts": [
+      "./scripts/chocolatey.ps1",
+	  "./scripts/apps.ps1",
+	  "./scripts/disable-uac.ps1",
+	  "./scripts/disable-screensaver.ps1"
+    ]
+	},
+	{
+      "type": "powershell",
+      "inline": ["choco install powershell -y"],
+	  "elevated_user": "administrator",
+	  "elevated_password": "raid4us!",
+      "valid_exit_codes": [
+        0,
+        3010
+      ]
+    },
+	{
+      "type": "windows-restart",
+      "restart_timeout": "1h"
+	},
+	{
+	"type": "powershell",
+    "elevated_user": "administrator",
+    "elevated_password": "raid4us!",
+    "scripts": [
+      "./scripts/install-vmware-tools.ps1",
+	  "./scripts/enable-rdp.ps1",
+	  "./scripts/compile-dotnet-assemblies.ps1",
+      "./scripts/cleanup.ps1",
+      "./scripts/ultradefrag.ps1",
+      "./scripts/optimize-drive.ps1",
+      "./scripts/sdelete.ps1"   
+    ]
+	}
+  ],
+  "post-processors": [
+  ],
+  "variables": {
+    "iso_url": "E:/Downloads/en_windows_10_enterprise_2016_ltsb_x64_dvd_9059483.iso",
+    "iso_checksum_type": "md5",
+    "iso_checksum": "e39ea2af41b3710682fe3bbdac35ec9a",
+    "autounattend": "./answer_files/10/Autounattend.xml",
+	"hostName": "192.168.64.126",
+    "ESXusernameText": "root",
+    "ESXpasswordText": "raid4us!",
+    "vm_networkName": "VM Network",
+    "datastoreName": "vmdatastore",
+    "disk_size": "61440"
+  }
+}

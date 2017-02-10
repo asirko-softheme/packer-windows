@@ -7,6 +7,9 @@ winrm set winrm/config/service '@{AllowUnencrypted="true"}'
 winrm set winrm/config/service/auth '@{Basic="true"}'
 winrm set winrm/config/client/auth '@{Basic="true"}'
 winrm set winrm/config/listener?Address=*+Transport=HTTP '@{Port="5985"}'
+winrm set winrm/config/client '@{TrustedHosts="*"}'
+winrm set winrm/config/service '@{TrustedHosts="*"}'
+winrm set winrm/config/client '@{AllowUnencrypted="true"}'
 netsh advfirewall firewall set rule group="Windows Remote Administration" new enable=yes
 netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=allow
 Set-Service winrm -startuptype "auto"
