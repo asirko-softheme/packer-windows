@@ -99,7 +99,7 @@
     "iso_url": "E:/Downloads/en_windows_server_2016_x64_dvd_9327751.iso",
     "iso_checksum_type": "md5",
     "iso_checksum": "91d7b2ebcff099b3557570af7a8a5cd6",
-    "autounattend": "./answer_files/2016_updates/Autounattend.xml",
+    "autounattend": "./answer_files/2016_winrm/Autounattend.xml",
     "hostName": "192.168.64.126",
     "ESXusernameText": "root",
     "ESXpasswordText": "raid4us!",

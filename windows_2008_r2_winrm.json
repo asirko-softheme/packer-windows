@@ -124,7 +124,7 @@
     "iso_url": "E:/Downloads/en_windows_server_2008_r2_with_sp1_vl_build_x64_dvd_617403.iso",
     "iso_checksum_type": "md5",
     "iso_checksum": "8d397b69135d207452a78c3c3051339d",
-    "autounattend": "./answer_files/2008_r2/Autounattend.xml",
+    "autounattend": "./answer_files/2008_r2_winrm/Autounattend.xml",
     "hostName": "192.168.64.126",
     "ESXusernameText": "root",
     "ESXpasswordText": "raid4us!",
